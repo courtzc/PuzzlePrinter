@@ -1,5 +1,5 @@
 # PuzzlePrinter
-Prints a pdf of puzzles from the websites `https://www.puzzle-{puzzle}.com`.
+Creates printable pdf collections of puzzles from the websites `https://www.puzzle-{puzzle}.com`.
 
 ## How to run
 In the command prompt, in the src folder, run
