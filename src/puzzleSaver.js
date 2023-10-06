@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const path = require('path'); // Import the 'path' module
-const { PDFDocument, rgb } = require('pdf-lib');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const { format } = require('date-fns');
 const fs = require('fs');
 const sharp = require('sharp'); // Import the sharp library
@@ -11,6 +11,7 @@ if (process.argv.length !== 3) {
   process.exit(1);
 }
 
+
 const configFile = process.argv[2];
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -19,7 +20,7 @@ const launchBrowser = async (url) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
-  await delay(500);
+  await delay(500); 
   return { browser, page }
 }
 
@@ -61,7 +62,7 @@ const captureScreenshots = async (page) => {
 }
 
 
-const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTitle) => {
+const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTitle, aspectRatio) => {
 
   // Get image sizes
   const titleImage = sharp(screenshotTitle);
@@ -71,7 +72,7 @@ const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTi
 
   const pageHeight = 3508; // px
   const pageWidth = 2480; // px
-  const puzzlePosX = (pageWidth / 2) - (pageWidth * 0.8 / 2); // px
+  const puzzlePosX = (pageWidth / 2) - (pageWidth * 0.8 * aspectRatio.width / 2); // px
   const puzzlePosY = (pageHeight / 2) - (pageWidth * 0.8 / 2); // px
 
   // Add the puzzle as a new page to the PDF
@@ -83,7 +84,7 @@ const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTi
   imagePage.drawImage(imageBytesPuzzle, {
     x: puzzlePosX,
     y: puzzlePosY,
-    width: pageWidth * 0.8,
+    width: pageWidth * 0.8 * aspectRatio.width,
     height: pageWidth * 0.8,
   });
 
@@ -104,7 +105,7 @@ const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTi
 }
 
 
-const addTitlePage = async (pdfDoc, page) => {
+const addTitlePage = async (pdfDoc, page, puzzleName) => {
 
   const pageHeight = 3508; // px
   const pageWidth = 2480; // px
@@ -136,6 +137,23 @@ const addTitlePage = async (pdfDoc, page) => {
     height: titleHeight,
   });
 
+
+  // Calculate the X-coordinate to center the text
+  const textAfterComma = puzzleName.split(', ').slice(1).join(', ');
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontSize = 96;
+  const textWidth = font.widthOfTextAtSize(textAfterComma, fontSize);
+  const textX = (pageWidth - textWidth) / 2;
+
+  // Add the text underneath the titleImage
+  imagePage.drawText(textAfterComma, {
+    x: textX,
+    y: pageHeight * 0.85 - 250, // Adjust the Y-coordinate as needed
+    size: fontSize,
+    font: font,
+    color: rgb(0.33, 0.33, 0.33), // Black color
+  });
+
   imagePage.drawImage(imageBytesRules, {
     x: (pageWidth / 2) - (rulesNewWidth / 2),
     y: pageHeight * 0.2,
@@ -150,7 +168,12 @@ const savePdf = async (pdfDoc, puzzleName) => {
     const pdfBytes = await pdfDoc.save();
 
     const currentDate = format(new Date(), 'yyyyMMdd');
-    const filename = `../puzzles/${puzzleName}_puzzles_${currentDate}.pdf`;
+
+    let modifiedString = puzzleName.replace(/, | /g, "_");
+
+    console.log(modifiedString);
+
+    const filename = `../puzzles/${modifiedString}_puzzles_${currentDate}.pdf`;
   
     console.log(`Saving PDF to ${filename}.`)
   
@@ -159,12 +182,12 @@ const savePdf = async (pdfDoc, puzzleName) => {
     fs.writeFileSync(filename, pdfBytes);
 }
 
-const printPuzzleSet = async (puzzleName, url, numPuzzles) => {
+const printPuzzleSet = async (puzzle, metadata) => {
 
-  console.log(`Now printing ${numPuzzles} ${puzzleName} puzzles.`)
+  console.log(`Now printing ${puzzle.numPuzzles} ${puzzle.puzzleName} puzzles.`)
 
   // launch web page
-  const { browser, page } = await launchBrowser(url);
+  const { browser, page } = await launchBrowser(puzzle.url);
 
   // handle cookie popup
   await handleCookiePopup(page);
@@ -177,25 +200,32 @@ const printPuzzleSet = async (puzzleName, url, numPuzzles) => {
   const pdfDoc = await PDFDocument.create();
   const pageDelay = 350; // ms
 
-  // save title page
-  await addTitlePage(pdfDoc, page);
+  // Title page for normal sets
+  if (metadata.type == "normal")
+  {
+    await addTitlePage(pdfDoc, page, puzzle.puzzleName);
+  }
 
   // save puzzles
-  console.log(`Saving ${numPuzzles} puzzles.`)
+  console.log(`Saving ${puzzle.numPuzzles} puzzles.`)
 
-  for (let i = 0; i < numPuzzles; i++) {
+  for (let i = 0; i < puzzle.numPuzzles; i++) {
     try
     {
-      // Click on new puzzle
-      await newPuzzleButton.evaluate(element => element.click());
-      await delay(pageDelay);
-      newPuzzleButton = await page.$('#btnNew');
-
       // Take screenshots, with puzzle zoomed in
       const {screenshotPuzzle, screenshotInfo, screenshotTitle} = await captureScreenshots(page)
 
       // Add iamges to PDF
-      await drawImages(pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTitle);
+      await drawImages(pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTitle, puzzle.aspectRatio);
+
+      // Click on new puzzle for normal sets
+      if (metadata.type == "normal")
+      {
+        await newPuzzleButton.evaluate(element => element.click());
+        await delay(pageDelay);
+        newPuzzleButton = await page.$('#btnNew');
+      }
+      
     }
     catch (error)
     {  
@@ -206,17 +236,21 @@ const printPuzzleSet = async (puzzleName, url, numPuzzles) => {
       await page.goto(url);
       await delay(500);
       i--;
-      newPuzzleButton = await page.$('#btnNew');
+
+      if (metadata.type == "normal")
+      {
+        newPuzzleButton = await page.$('#btnNew');
+      }
     }
   }
 
-  await savePdf(pdfDoc, puzzleName);
-
+  await savePdf(pdfDoc, puzzle.puzzleName);
   await browser.close();
 }
 
-// Read and parse the JSON data file
-fs.readFile(configFile, 'utf8', (err, data) => {
+
+ // Read and parse the JSON data file
+fs.readFile(configFile, 'utf8', async (err, data) => {
 
   if (err) {
     console.error(`Error reading JSON file: ${err}`);
@@ -225,11 +259,29 @@ fs.readFile(configFile, 'utf8', (err, data) => {
 
   try {
     const puzzleData = JSON.parse(data);
-    const numPuzzles = 3;
+
+    const metadata = puzzleData.metadata;
+    const puzzles = puzzleData.puzzles;
 
     // Loop through the JSON data and run the script for each puzzle
-    for (const puzzle of puzzleData) {
-      printPuzzleSet(puzzle.puzzleName, puzzle.url, numPuzzles);
+    for (const puzzle of puzzles) {
+      if (puzzle.puzzleName != null && puzzle.url != null && puzzle.numPuzzles != null && puzzle.aspectRatio != null)
+      {
+        await printPuzzleSet(puzzle, metadata);
+      }
+      else
+      {
+        console.log("config not correct for this puzzle. Example of the format required: ")
+        console.log(
+          `{
+            "puzzleName": "Renzoku, 9x9, Hard",
+            "url": "https://www.puzzle-futoshiki.com/renzoku-9x9-hard/",
+            "numPuzzles": 25,
+            "aspectRatio": {"height": 1, "width": 1.14516}
+          },`
+        )
+      }
+      
     }
   } catch (jsonError) {
     console.error(`Error parsing JSON: ${jsonError}`);
@@ -237,3 +289,4 @@ fs.readFile(configFile, 'utf8', (err, data) => {
   }
 
 });
+

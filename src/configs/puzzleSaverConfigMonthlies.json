@@ -1,0 +1,43 @@
+{
+    "metadata": {
+        "type": "special"
+    },
+    "puzzles": [
+        {
+            "puzzleName": "Thermometers, Monthly, Curved",
+            "url": "https://www.puzzle-thermometers.com/?size=13",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Thermometers, Monthly, Straight",
+            "url": "https://www.puzzle-thermometers.com/?size=12",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Stitches, Monthly, 1 Stitch",
+            "url": "https://www.puzzle-stitches.com/?size=18",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Aquarium, Monthly",
+            "url": "https://www.puzzle-aquarium.com/?size=11",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Battleships, Monthly",
+            "url": "https://www.puzzle-battleships.com/?size=10",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 0.78417}
+        },
+        {
+            "puzzleName": "Renzoku, Monthly",
+            "url": "https://www.puzzle-futoshiki.com/monthly-renzoku/",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1.14516}
+        }
+    ]
+}
