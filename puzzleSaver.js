@@ -63,8 +63,8 @@ function runScript(puzzleName, url) {
     let puzzleDiv;
     let puzzleInfoDiv;
     let puzzleTitleDiv;
-    let newButton;
-    newButton = await page.$('#btnNew');
+    let newPuzzleButton;
+    newPuzzleButton = await page.$('#btnNew');
 
     // initialise PDF
     const pdfDoc = await PDFDocument.create();
@@ -81,19 +81,29 @@ function runScript(puzzleName, url) {
       try
       {
         // Click on new puzzle
-        await newButton.evaluate(element => element.click());
+        await newPuzzleButton.evaluate(element => element.click());
         await delay(pageDelay);
 
         // Gather elements again
         puzzleDiv = await page.$('#puzzleContainerDiv');
         puzzleInfoDiv = await page.$('#puzzleForm > div.puzzleInfo');
         puzzleTitleDiv = await page.$('#logoLink > img');
-        newButton = await page.$('#btnNew');
+        newPuzzleButton = await page.$('#btnNew');
 
-        // Take a screenshot of element B
+        // Take screenshots, with puzzle zoomed in
+        await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 3 });
         const screenshotPuzzle = await puzzleDiv.screenshot();
+        await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
         const screenshotInfo = await puzzleInfoDiv.screenshot();
         const screenshotTitle = await puzzleTitleDiv.screenshot();
+
+
+        // Get image sizes
+        const titleImage = sharp(screenshotTitle);
+        const { width: titleWidth, height: titleHeight } = await titleImage.metadata();
+        const infoImage = sharp(screenshotInfo);
+        const { width: infoWidth, height: infoHeight } = await infoImage.metadata();
+
 
         // Add the puzzle as a new page to the PDF
         const imagePage = pdfDoc.addPage([pageWidth, pageHeight]);
@@ -101,16 +111,7 @@ function runScript(puzzleName, url) {
         const imageBytesInfo = await pdfDoc.embedPng(screenshotInfo);
         const imageBytesTitle = await pdfDoc.embedPng(screenshotTitle);
 
-        const titleImage = sharp(screenshotTitle);
-        const { width: titleWidth, height: titleHeight } = await titleImage.metadata();
-        const infoImage = sharp(screenshotInfo);
-        const { width: infoWidth, height: infoHeight } = await infoImage.metadata();
-
-
-        console.log(`Screenshot Height: ${titleHeight}px`);
-        console.log(`Screenshot Width: ${titleWidth}px`);
     
-
         imagePage.drawImage(imageBytesPuzzle, {
           x: puzzlePosX,
           y: puzzlePosY,
@@ -140,7 +141,7 @@ function runScript(puzzleName, url) {
         await page.reload();
         await page.goto(url);
         await delay(500);
-        newButton = await page.$('#btnNew');
+        newPuzzleButton = await page.$('#btnNew');
       }
     }
 
