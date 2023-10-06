@@ -1,139 +1,119 @@
 const puppeteer = require('puppeteer');
 const path = require('path'); // Import the 'path' module
+const { PDFDocument, rgb } = require('pdf-lib');
+const { format } = require('date-fns');
 
+// Check if a URL argument is provided
+if (process.argv.length !== 4) {
+  // node puzzleSaver.js Thermometers https://www.puzzle-thermometers.com/?size=7
+  console.error('Usage: node script.js <PuzzleName> <URL>');
+  process.exit(1);
+}
 
-// Define the URL you want to navigate to.
-const url = 'https://www.puzzle-thermometers.com/?size=7'; // Replace with your target URL
-const puzzleName = 'Thermometers';
-const numPuzzles = 3;
-let counter = 3;
+const puzzleName = process.argv[2];
+const url = process.argv[3];
 
 (async () => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(url);
-    const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    const cookiePopupSelector = "#qc-cmp2-ui"
-    const acceptButtonSelector = '#qc-cmp2-ui > div.qc-cmp2-footer.qc-cmp2-footer-overlay.qc-cmp2-footer-scrolled > div > button.css-47sehv'
+  // Inputs
+  // const url = ''; // Replace with your target URL
+  // const puzzleName = 'Thermometers';
+  const numPuzzles = 50;
 
-    // Define your elements here, e.g., by CSS selector.
-    await delay(500);
+  // Known constants
+  const cookiePopupSelector = "#qc-cmp2-ui"
+  const acceptButtonSelector = '#qc-cmp2-ui > div.qc-cmp2-footer.qc-cmp2-footer-overlay.qc-cmp2-footer-scrolled > div > button.css-47sehv'
 
-    console.log("dealing with popup...")
+  const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    const handleCookiePopup = async () => {
-        const popup = await page.$(cookiePopupSelector);
+  const handleCookiePopup = async () => {
     
-        if (popup) {
-          const button = await popup.$(acceptButtonSelector);
-          if (button) {
-            button.click();
-            console.log('Clicked the "Accept" button on the cookie pop-up.');
-            await delay(500);
-            console.log("Waited 2s");
-          } else {
-            console.error('Button not found within the pop-up.');
-          }
-        } else {
-          console.log("Cookie pop-up not found.");
-        }
-    };
-
-    await handleCookiePopup();
-
-    console.log("waiting for the popup to go away...")
-    await page.reload()
-    // await delay(3000)
-    console.log("finding the puzzle...")
-    // const elementCookiePopupAccept = await page.$(acceptButton)
-    const elementA = await page.$('#puzzleForm > div.noprint.puzzleButtons');
-    const elementB = await page.$('#puzzleContainerDiv');
-    const elementC = await page.$('#btnNew');
-
-    if (elementB)
-    {
-        const textB = await page.evaluate(el => el.textContent, elementB);
-        console.log('Text from the puzzle:', textB);
+    const popup = await page.$(cookiePopupSelector);
+    if (popup) {
+      const button = await popup.$(acceptButtonSelector);
+      if (button) {
+        button.click();
+        console.log('Clicked the "Accept" button on the cookie pop-up.');
+        await delay(200);
+      } else {
+        console.error('"Accept" button not found within the cookie pop-up.');
+      }
     } else {
-        console.log('Puzzle not found after accepting cookies.');
+      console.log("Cookie pop-up not found.");
     }
+  };
 
-    if (elementA)
+  // launch web page
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url);
+  await delay(500);
+
+  // handle cookie popup
+  await handleCookiePopup();
+
+  // reload page
+  await page.reload();
+  console.log(`Saving ${numPuzzles} puzzles.`)
+
+  // set up puzzle finders
+  let puzzleDiv;
+  let newButton;
+  newButton = await page.$('#btnNew');
+
+  // initialise PDF
+  const pdfDoc = await PDFDocument.create();
+  const pageHeight = 841.89; 
+  const pageWidth = 595;
+
+  let pageDelay = 350;
+
+  for (let i = 0; i < numPuzzles; i++) {
+    try
     {
-        const textA = await page.evaluate(el => el.textContent, elementA);
-        console.log('Text from all puzzle buttons:', textA);
-    } else {
-        console.log('all puzzle button not found after accepting cookies.');
+      // Click on new puzzle
+      await newButton.evaluate(element => element.click());
+      await delay(pageDelay);
+
+      // Gather elements again
+      puzzleDiv = await page.$('#puzzleContainerDiv');
+      newButton = await page.$('#btnNew');
+
+      // Take a screenshot of element B
+      const screenshot = await puzzleDiv.screenshot();
+
+      // Add the puzzle as a new page to the PDF
+      const imagePage = pdfDoc.addPage([pageWidth, pageHeight]);
+      const imageBytes = await pdfDoc.embedPng(screenshot);
+      imagePage.drawImage(imageBytes, {
+        x: (pageWidth / 2) - (pageWidth * 0.8 / 2),
+        y: (pageHeight / 2) - (pageWidth * 0.8 / 2),
+        width: pageWidth * 0.8,
+        height: pageWidth * 0.8,
+      });
     }
-
-    if (elementC)
-    {
-        const textC = await page.evaluate(el => el.textContent, elementC);
-        // console.log("Value of 'btnNew' element:", elementC.value);
-        console.log("'btnNew' element:", elementC);
-        const elementInfo = await elementC.evaluate(el => {
-            return {
-              tagName: el.tagName,
-              id: el.id,
-              className: el.className,
-              // Add more properties as needed
-            };
-          });
-          
-          console.log("Element Info:", elementInfo);
-    } else {
-        console.log('new puzzle button not found after accepting cookies.');
+    catch (error)
+    {  
+      console.error(`Error capturing puzzle ${i}: ${error.message}`);
+      i--;
+      await page.reload();
+      await page.goto(url);
+      await delay(500);
+      newButton = await page.$('#btnNew');
     }
-  
-    
-    console.log(`saving ${numPuzzles} puzzles...`)
+  }
 
-    let puzzleDiv;
-    let newButton;
-    newButton = await page.$('#btnNew');
+  // Save the combined PDF with all the puzzles
+  const pdfBytes = await pdfDoc.save();
+  await browser.close();
 
-    for (let i = 0; i < numPuzzles; i++) {
+  const currentDate = format(new Date(), 'yyyyMMdd');
+  const filename = `puzzles/${puzzleName}_puzzles_${currentDate}.pdf`;
 
-        try
-        {
-            console.log("Clicking on new puzzle...")
-            await newButton.evaluate(element => element.click());
-            await delay(1000);
+  console.log(`Saving PDF to ${filename}.`)
 
-            console.log("Gathering elements again...")
-            puzzleDiv = await page.$('#puzzleContainerDiv');
-            newButton = await page.$('#btnNew');
+  // Write the PDF to a file
+  const fs = require('fs');
+  fs.writeFileSync(filename, pdfBytes);
 
-             // Take a screenshot of element B
-            console.log("Taking a screenshot of puzzle...")
-            await puzzleDiv.screenshot({ path: path.join(__dirname, `${puzzleName}_${counter}.png`) }); // Save screenshot in the script's directory
-
-            const boundingBox = await puzzleDiv.boundingBox();
-            const pageHeight = 841.89; // Height of A4 page in points (11.69 inches)
-
-            
-            await page.pdf({
-                path: `${puzzleName}_${counter}.pdf`,
-                format: 'A4',
-                margin: {
-                    top: `${pageHeight/2 - boundingBox.height / 2}px`, // Halfway down the page
-                    left: '0',
-                    right: '0',
-                    bottom: '0',
-                  },
-              });
-
-            console.log(`Successfully captured screenshot ${i}`);
-            await delay(100); // 0.1 second delay, adjust as needed
-            counter++;
-        }
-        catch (error)
-        {  
-            console.error(`Error capturing screenshot ${i}: ${error.message}`);
-        }
-
-    }
-
-    await browser.close();
 })();

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "date-fns": "^2.30.0",
     "path": "^0.12.7",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^21.3.6",
