@@ -15,20 +15,31 @@ The config file defines which puzzles to print out, and how many.
 
 Example config file:
 ```
-[
-    {
-        "puzzleName": "Aquarium, 15x15, Normal",
-        "url": "https://www.puzzle-aquarium.com/?size=7",
-        "numPuzzles": 25,
-        "aspectRatio": {"height": 1, "width": 1}
+{
+    "metadata": {
+        "type": "normal" // can be "normal" or "special"
     },
-    {
-        "puzzleName": "Battleships, 15x15, Hard",
-        "url": "https://www.puzzle-battleships.com/?size=7",
-        "numPuzzles": 20,
-        "aspectRatio": {"height": 1, "width": 0.78417}
-    }
-]
+    "puzzles": [
+        {
+            "puzzleName": "Thermometers, 15x15, Curved",
+            "url": "https://www.puzzle-thermometers.com/?size=7",
+            "numPuzzles": 50,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Thermometers, 15x15, Straight",
+            "url": "https://www.puzzle-thermometers.com/?size=6",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        }
+    ]
+}
 ```
 
 ### Find the puzzle aspect ratio
