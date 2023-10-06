@@ -3,8 +3,8 @@ Creates printable pdf collections of puzzles from the websites `https://www.puzz
 
 ## How to run
 In the command prompt, in the src folder, run
-`node puzzleSaver.js <puzzle config json file>`
-e.g. `node puzzleSaver.js puzzleSaverConfig.json`
+`node puzzleSaver.js configs/<puzzle config json file>`
+e.g. `node puzzleSaver.js configs/puzzleSaverConfig.json`
 
 The pdfs will save to your puzzles/ folder
 
