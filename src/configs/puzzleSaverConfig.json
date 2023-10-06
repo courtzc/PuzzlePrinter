@@ -1,0 +1,106 @@
+{
+    "metadata": {
+        "type": "normal"
+    },
+    "puzzles": [
+        {
+            "puzzleName": "Thermometers, 15x15, Curved",
+            "url": "https://www.puzzle-thermometers.com/?size=7",
+            "numPuzzles": 50,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Thermometers, 15x15, Straight",
+            "url": "https://www.puzzle-thermometers.com/?size=6",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Stitches, 15x15, 1 Stitch, Hard",
+            "url": "https://www.puzzle-stitches.com/?size=13",
+            "numPuzzles": 50,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Stitches, 15x15, 2 Stitches, Hard",
+            "url": "https://www.puzzle-stitches.com/?size=14",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Stitches, 15x15, 3 Stitches, Hard",
+            "url": "https://www.puzzle-stitches.com/?size=15",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Aquarium, 15x15, Hard",
+            "url": "https://www.puzzle-aquarium.com/?size=8",
+            "numPuzzles": 50,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Aquarium, 15x15, Normal",
+            "url": "https://www.puzzle-aquarium.com/?size=7",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        },
+        {
+            "puzzleName": "Battleships, 15x15, Hard",
+            "url": "https://www.puzzle-battleships.com/?size=7",
+            "numPuzzles": 20,
+            "aspectRatio": {
+                "height": 1,
+                "width": 0.78417
+            }
+        },
+        {
+            "puzzleName": "Renzoku, 9x9, Hard",
+            "url": "https://www.puzzle-futoshiki.com/renzoku-9x9-hard/",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1.14516
+            }
+        },
+        {
+            "puzzleName": "Renzoku, 9x9, Normal",
+            "url": "https://www.puzzle-futoshiki.com/renzoku-9x9-normal/",
+            "numPuzzles": 10,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1.14516
+            }
+        },
+        {
+            "puzzleName": "Renzoku, 7x7, Hard",
+            "url": "https://www.puzzle-futoshiki.com/renzoku-7x7-hard/",
+            "numPuzzles": 25,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1.13158
+            }
+        }
+    ]
+}

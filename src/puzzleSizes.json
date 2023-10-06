@@ -1,0 +1,32 @@
+{
+    "Aquarium": {
+        "aspectRatio": {
+            "height": 1,
+            "width": 1
+        }
+    },
+    "Stitches": {
+        "aspectRatio": {
+            "height": 1,
+            "width": 1
+        }
+    },
+    "Thermometers": {
+        "aspectRatio": {
+            "height": 1,
+            "width": 1
+        }
+    },
+    "Battleships": {
+        "aspectRatio": {
+            "height": 1,
+            "width": 0.78417
+        }
+    },
+    "Renzoku": {
+        "aspectRatio": {
+            "height": 1,
+            "width": 1.14516
+        }
+    }
+}

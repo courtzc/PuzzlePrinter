@@ -1,0 +1,43 @@
+{
+    "metadata": {
+        "type": "special"
+    },
+    "puzzles": [
+        {
+            "puzzleName": "Thermometers, Weekly, Curved",
+            "url": "https://www.puzzle-thermometers.com/?size=11",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Thermometers, Weekly, Straight",
+            "url": "https://www.puzzle-thermometers.com/?size=10",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Stitches, Weekly, 4 Stitches",
+            "url": "https://www.puzzle-stitches.com/?size=17",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Aquarium, Weekly",
+            "url": "https://www.puzzle-aquarium.com/?size=10",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1}
+        },
+        {
+            "puzzleName": "Battleships, Weekly",
+            "url": "https://www.puzzle-battleships.com/?size=9",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 0.78417}
+        },
+        {
+            "puzzleName": "Renzoku, Weekly",
+            "url": "https://www.puzzle-futoshiki.com/weekly-renzoku/",
+            "numPuzzles": 1,
+            "aspectRatio": {"height": 1, "width": 1.14516}
+        }
+    ]
+}
