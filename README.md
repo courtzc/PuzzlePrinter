@@ -57,3 +57,7 @@ Known ratios:
 ```
 
 To find a ratio for a new puzzle, go to the puzzle online, open dev tools (`ctrl+shift+i`) and then key in `ctrl+shift+c`. Hover over the div '#puzzleContainerDiv' to see the width and height. Normalise to 1 height by x width.
+
+
+## To do
+Add printing from node? https://www.npmjs.com/package/pdf-to-printer
