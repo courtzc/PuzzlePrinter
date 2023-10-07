@@ -1,6 +1,7 @@
 {
     "metadata": {
-        "type": "special"
+        "type": "special",
+        "format": ["print"]
     },
     "puzzles": [
         {

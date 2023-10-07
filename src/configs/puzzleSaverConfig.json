@@ -1,6 +1,7 @@
 {
     "metadata": {
-        "type": "normal"
+        "type": "normal",
+        "format": ["save", "print"]
     },
     "puzzles": [
         {

@@ -1,43 +1,14 @@
 {
     "metadata": {
-        "type": "special"
+        "type": "special",
+        "format": ["print"]
     },
     "puzzles": [
-        {
-            "puzzleName": "Thermometers, Daily, Curved",
-            "url": "https://www.puzzle-thermometers.com/?size=9",
-            "numPuzzles": 1,
-            "aspectRatio": {"height": 1, "width": 1}
-        },
-        {
-            "puzzleName": "Thermometers, Daily, Straight",
-            "url": "https://www.puzzle-thermometers.com/?size=8",
-            "numPuzzles": 1,
-            "aspectRatio": {"height": 1, "width": 1}
-        },
         {
             "puzzleName": "Stitches, Daily, 4 Stitches",
             "url": "https://www.puzzle-stitches.com/?size=16",
             "numPuzzles": 1,
             "aspectRatio": {"height": 1, "width": 1}
-        },
-        {
-            "puzzleName": "Aquarium, Daily",
-            "url": "https://www.puzzle-aquarium.com/?size=9",
-            "numPuzzles": 1,
-            "aspectRatio": {"height": 1, "width": 1}
-        },
-        {
-            "puzzleName": "Battleships, Daily",
-            "url": "https://www.puzzle-battleships.com/?size=8",
-            "numPuzzles": 1,
-            "aspectRatio": {"height": 1, "width": 0.78417}
-        },
-        {
-            "puzzleName": "Renzoku, Daily",
-            "url": "https://www.puzzle-futoshiki.com/daily-renzoku/",
-            "numPuzzles": 1,
-            "aspectRatio": {"height": 1, "width": 1.14516}
         }
     ]
 }
