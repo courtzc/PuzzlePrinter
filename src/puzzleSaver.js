@@ -4,6 +4,7 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const { format } = require('date-fns');
 const fs = require('fs');
 const sharp = require('sharp'); // Import the sharp library
+const { print, getPrinters } = require('pdf-to-printer')
 
 // Check if a URL argument is provided
 if (process.argv.length !== 3) {
@@ -163,15 +164,12 @@ const addTitlePage = async (pdfDoc, page, puzzleName) => {
 
 }
 
-const savePdf = async (pdfDoc, puzzleName) => {
-    // Save the combined PDF with all the puzzles
-    const pdfBytes = await pdfDoc.save();
+const savePdf = async (pdfBytes, puzzleName) => {
 
+    // Save the combined PDF with all the puzzles
     const currentDate = format(new Date(), 'yyyyMMdd');
 
     let modifiedString = puzzleName.replace(/, | /g, "_");
-
-    console.log(modifiedString);
 
     const filename = `../puzzles/${modifiedString}_puzzles_${currentDate}.pdf`;
   
@@ -180,7 +178,37 @@ const savePdf = async (pdfDoc, puzzleName) => {
     // Write the PDF to a file
     const fs = require('fs');
     fs.writeFileSync(filename, pdfBytes);
+
+    return filename;
 }
+
+const printPdf = async (fileName, type) => {
+
+  console.log("I'll also print!")
+
+  const printers = await getPrinters();
+
+  console.log('Available Printers: ', printers.length);
+
+  printers.forEach((printer) => {
+    console.log(printer.name);
+  });
+
+  try {
+    // Print the PDF to a printer on the Wi-Fi network
+    const options =  {
+      printer: 'Brother HL-L2350DW series',
+      pageSize: 'A4',
+      scale: 'shrink'
+    };
+    await print(fileName, options);
+    console.log('PDF printed successfully.');
+  } catch (error) {
+    console.error('Error printing PDF:', error);
+  }
+
+}
+
 
 const printPuzzleSet = async (puzzle, metadata) => {
 
@@ -244,7 +272,8 @@ const printPuzzleSet = async (puzzle, metadata) => {
     }
   }
 
-  await savePdf(pdfDoc, puzzle.puzzleName);
+  const pdfBytes = await pdfDoc.save();
+  const fileName = await savePdf(pdfBytes, puzzle.puzzleName);
   await browser.close();
 }
 
