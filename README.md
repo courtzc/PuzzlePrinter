@@ -8,6 +8,9 @@ e.g. `node puzzleSaver.js configs/puzzleSaverConfig.json`
 
 The pdfs will save to your puzzles/ folder
 
+## How to automate
+If on windows, you can set up tasks in the task scheduler which will run and save the special puzzles (daily, weekly, monthly). Import `src/PuzzlesDailyScheduler.xml` etc into your Daily Scheduler, adjusting the path to `node`, and your `PuzzlePrinter` repository.
+
 ## How to customise
 
 ### Create a Config file
