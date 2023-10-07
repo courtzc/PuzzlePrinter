@@ -272,17 +272,8 @@ const printPuzzleSet = async (puzzle, metadata) => {
     }
   }
 
-  console.log("splitting")
-  const twoPerPagePdfDoc = twoPerPage(pdfDoc);
-  console.log("saving")
-  const pdfBytes = await twoPerPagePdfDoc.save();
+  const pdfBytes = await pdfDoc.save();
   const fileName = await savePdf(pdfBytes, puzzle.puzzleName);
-  
-  if (metadata.format.includes("print"))
-  {
-    await printPdf(fileName, metadata.type)
-  }
-  
   await browser.close();
 }
 
