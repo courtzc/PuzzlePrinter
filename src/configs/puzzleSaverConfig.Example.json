@@ -1,6 +1,7 @@
 {
     "metadata": {
-        "type": "normal" // can be "normal" or "special",
+        "type": "normal", // can be "normal" or "special",
+        "name": "ExamplePuzzles"
     },
     "puzzles": [
         {

@@ -1,6 +1,7 @@
 {
     "metadata": {
-        "type": "special"
+        "type": "special",
+        "name": "WeeklyPuzzles"
     },
     "puzzles": [
         {

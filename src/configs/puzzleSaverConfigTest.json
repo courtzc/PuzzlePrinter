@@ -1,0 +1,18 @@
+{
+    "metadata": {
+        "type": "normal",
+        "name": "TestPuzzles",
+        "nup": 2
+    },
+    "puzzles": [
+        {
+            "puzzleName": "Thermometers, 15x15, Curved",
+            "url": "https://www.puzzle-thermometers.com/?size=7",
+            "numPuzzles": 3,
+            "aspectRatio": {
+                "height": 1,
+                "width": 1
+            }
+        }
+    ]
+}

@@ -5,13 +5,13 @@ const { format } = require('date-fns');
 const fs = require('fs');
 const sharp = require('sharp'); // Import the sharp library
 const { print, getPrinters } = require('pdf-to-printer')
+const Jimp = require('jimp');
 
 // Check if a URL argument is provided
 if (process.argv.length !== 3) {
   console.error('Usage: node script.js <json file>');
   process.exit(1);
 }
-
 
 const configFile = process.argv[2];
 
@@ -62,7 +62,6 @@ const captureScreenshots = async (page) => {
     return { screenshotPuzzle, screenshotInfo, screenshotTitle }
 }
 
-
 const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTitle, aspectRatio) => {
 
   // Get image sizes
@@ -71,8 +70,8 @@ const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTi
   const infoImage = sharp(screenshotInfo);
   const { width: infoWidth, height: infoHeight } = await infoImage.metadata();
 
-  const pageHeight = 3508; // px
-  const pageWidth = 2480; // px
+  const pageHeight = 3508; // px, A4
+  const pageWidth = 2480; // px, A4
   const puzzlePosX = (pageWidth / 2) - (pageWidth * 0.8 * aspectRatio.width / 2); // px
   const puzzlePosY = (pageHeight / 2) - (pageWidth * 0.8 / 2); // px
 
@@ -105,11 +104,10 @@ const drawImages = async (pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTi
 
 }
 
-
 const addTitlePage = async (pdfDoc, page, puzzleName) => {
 
-  const pageHeight = 3508; // px
-  const pageWidth = 2480; // px
+  const pageHeight = 3508; // px, A4
+  const pageWidth = 2480; // px, A4
 
   const imagePage = pdfDoc.addPage([pageWidth, pageHeight]);
 
@@ -182,33 +180,15 @@ const savePdf = async (pdfBytes, puzzleName) => {
     return filename;
 }
 
-const printPdf = async (fileName, type) => {
+// Function to convert a screenshot to black and white using jimp
+const convertToBlackAndWhite = async (screenshotBuffer) => {
+  const image = await Jimp.read(screenshotBuffer);
 
-  console.log("I'll also print!")
+  // Thresholding to black and white
+  image.threshold({ max: 128, replace: 255, below: 128 });
 
-  const printers = await getPrinters();
-
-  console.log('Available Printers: ', printers.length);
-
-  printers.forEach((printer) => {
-    console.log(printer.name);
-  });
-
-  try {
-    // Print the PDF to a printer on the Wi-Fi network
-    const options =  {
-      printer: 'Brother HL-L2350DW series',
-      pageSize: 'A4',
-      scale: 'shrink'
-    };
-    await print(fileName, options);
-    console.log('PDF printed successfully.');
-  } catch (error) {
-    console.error('Error printing PDF:', error);
-  }
-
+  return image.getBufferAsync(Jimp.MIME_PNG);
 }
-
 
 const printPuzzleSet = async (puzzle, metadata) => {
 
@@ -243,8 +223,15 @@ const printPuzzleSet = async (puzzle, metadata) => {
       // Take screenshots, with puzzle zoomed in
       const {screenshotPuzzle, screenshotInfo, screenshotTitle} = await captureScreenshots(page)
 
-      // Add iamges to PDF
-      await drawImages(pdfDoc, screenshotPuzzle, screenshotInfo, screenshotTitle, puzzle.aspectRatio);
+      // thermometer has annoying shading, get rid of it
+      let finalScreenshotPuzzle = screenshotPuzzle
+      if (puzzle.puzzleName.includes("Thermometers"))
+      {
+        finalScreenshotPuzzle = await convertToBlackAndWhite(screenshotPuzzle)
+      }
+
+      // Add images to PDF
+      await drawImages(pdfDoc, finalScreenshotPuzzle, screenshotInfo, screenshotTitle, puzzle.aspectRatio);
 
       // Click on new puzzle for normal sets
       if (metadata.type == "normal")
@@ -261,7 +248,7 @@ const printPuzzleSet = async (puzzle, metadata) => {
       
       // stop and wait, try again
       await page.reload();
-      await page.goto(url);
+      await page.goto(puzzle.url);
       await delay(500);
       i--;
 
@@ -277,8 +264,7 @@ const printPuzzleSet = async (puzzle, metadata) => {
   await browser.close();
 }
 
-
- // Read and parse the JSON data file
+// Read and parse the JSON data file
 fs.readFile(configFile, 'utf8', async (err, data) => {
 
   if (err) {
@@ -294,7 +280,7 @@ fs.readFile(configFile, 'utf8', async (err, data) => {
 
     // Loop through the JSON data and run the script for each puzzle
     for (const puzzle of puzzles) {
-      if (puzzle.puzzleName != null && puzzle.url != null && puzzle.numPuzzles != null && puzzle.aspectRatio != null)
+      if (puzzle.puzzleName != null && puzzle.url != null && puzzle.numPuzzles != null && puzzle.aspectRatio != null && metadata.type != null)
       {
         await printPuzzleSet(puzzle, metadata);
       }
@@ -303,11 +289,18 @@ fs.readFile(configFile, 'utf8', async (err, data) => {
         console.log("config not correct for this puzzle. Example of the format required: ")
         console.log(
           `{
-            "puzzleName": "Renzoku, 9x9, Hard",
-            "url": "https://www.puzzle-futoshiki.com/renzoku-9x9-hard/",
-            "numPuzzles": 25,
-            "aspectRatio": {"height": 1, "width": 1.14516}
-          },`
+            "metadata": {
+              "type": "normal"
+            },
+            "puzzles": [
+              {
+                "puzzleName": "Renzoku, 9x9, Hard",
+                "url": "https://www.puzzle-futoshiki.com/renzoku-9x9-hard/",
+                "numPuzzles": 25,
+                "aspectRatio": {"height": 1, "width": 1.14516}
+              }
+            ]
+          }`
         )
       }
       
