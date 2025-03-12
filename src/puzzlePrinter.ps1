@@ -31,7 +31,8 @@ $printerName = "BULLDOZER"
 # Set-PrintConfiguration -PrinterName $printerName -Nup 2
 # # Set duplex mode to along the short side
 # $printConfig = Get-PrintConfiguration -PrinterName $printerName
-Set-PrintConfiguration -PrinterName $printerName -DuplexingMode TwoSidedLongEdge -PaperSize A5
+# Set-PrintConfiguration -PrinterName $printerName -DuplexingMode TwoSidedLongEdge -PaperSize A5
+Set-PrintConfiguration -PrinterName $printerName -DuplexingMode TwoSidedLongEdge -PaperSize A4
 
 
 # foreach ($property in $printConfig.PSObject.Properties) {

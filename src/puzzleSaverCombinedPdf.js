@@ -3,6 +3,7 @@ const path = require("path"); // Import the 'path' module
 const { PDFDocument, rgb, StandardFonts, degrees } = require("pdf-lib");
 const { format } = require("date-fns");
 const fs = require("fs");
+const fsPromises = require('fs/promises');
 const sharp = require("sharp"); // Import the sharp library
 const { print, getPrinters } = require("pdf-to-printer");
 const Jimp = require("jimp");
@@ -258,46 +259,102 @@ const drawThermometerLines = async (imageBuffer, puzzleName) => {
   });
 };
 
-// const makeTwoPagesPerSheet = async (pdfDoc) => {
-//   // Load the existing PDF document
+const makeTwoPagesPerSheet = async (inputPdfDoc, n) => {
+  console.log("makeTwoPagesPerSheet")
 
-//   // Create a new PDF document
-//   const newPdfDoc = await PDFDocument.create();
+  const numPages = inputPdfDoc.getPageIndices().length;
+  console.log("numPages: ", numPages)
+  const outputPdfDoc = await PDFDocument.create();
 
-//   // Loop through the original pages and add them two to a sheet
-//   for (let i = 0; i < pdfDoc.getPageCount(); i += 2) {
-//     // Create a new A4 page for each pair of original pages, rotated 90 degrees
-//     const [page1, page2] = await Promise.all([
-//       newPdfDoc.addPage([842, 595], degrees(90)),
-//       newPdfDoc.addPage([842, 595], degrees(90)),
-//     ]);
+  const pageWidthLandscape = 841.89;
+  const pageHeightLandscape = 595.28;
 
-//     // Get the original pages
-//     const originalPage1 = pdfDoc.getPage(i);
-//     const originalPage2 =
-//       i + 1 < pdfDoc.getPageCount() ? pdfDoc.getPage(i + 1) : null;
+  const pdfBytes = await inputPdfDoc.save();
 
-//     // Copy the original pages to the new pages
-//     page1.drawImage(originalPage1, {
-//       x: 0,
-//       y: 0,
-//       width: 595,
-//       height: 842 / 2,
-//     });
+  let page;
+  let xOffset = 0;
+  
+  for (let i = 0; i < numPages; i++)
+  {
+    if (i % 2 == 0)
+    {
+      // add a new page every second time
+      page = outputPdfDoc.addPage([pageWidthLandscape, pageHeightLandscape])
+      xOffset = 0;
+    }
+    else
+    {
+      xOffset = pageWidthLandscape / 2;
+    }
+    
+    const [embeddedPage] = await outputPdfDoc.embedPdf(pdfBytes, [i])
+    const scaleFactorX = pageHeightLandscape / embeddedPage.width
+    const scaleFactorY = pageWidthLandscape / embeddedPage.height
+    console.log("scaleFactorX: ", scaleFactorX / 1.375)
+    console.log("scaleFactorY: ", scaleFactorY / 1.375)
 
-//     if (page2) {
-//       page2.drawImage(originalPage2, {
-//         x: 0,
-//         y: 842 / 2,
-//         width: 595,
-//         height: 842 / 2,
-//       });
-//     }
-//   }
 
-//   // Save the modified PDF document to a file
-//   return newPdfDoc;
-// };
+    page.drawPage(embeddedPage, {
+      x: xOffset,
+      y: 0,
+      xScale: scaleFactorX / 1.375,
+      yScale: scaleFactorY / 1.375,
+    })
+
+  }
+
+  
+  // console.log("page added")
+
+  // const [input] = inputPdfDoc.getPages(0);
+  
+  // console.log("epdfBytes")
+  
+
+  // console.log("embeddedPage: ", embeddedPage)
+  // const size = embeddedPage.getSize();
+  // console.log("embeddedPage: ", embeddedPage)
+
+
+
+
+
+  // const outputPage = outputPdfDoc.addPage([width, height]);
+  // console.log("outputPage created")
+
+
+  // const nup = n;
+  // const xMargin = width / nup;
+  // const yMargin = height / nup;
+
+  // console.log("yMargin: ", yMargin)
+  // console.log("xMargin: ", xMargin)
+
+
+  // for (let i = 0; i < nup; ++i) {
+  //   for (let j = 0; j < nup; ++j) {
+  //     if (i === j && i === nup - 1) break;
+
+  //     const x = j * xMargin;
+
+
+  //     const y = (nup - i - 1) * yMargin;
+  //     console.log("x: ", x)
+  //     console.log("y: ", y)
+
+  //     outputPage.drawPage(inputPage[0], {
+  //       x,
+  //       y,
+  //       width: xMargin,
+  //       height: yMargin,
+  //     });
+
+  //     console.log("outputPage drawPage done")
+
+  //   }
+  // }
+  return outputPdfDoc
+};
 
 const printPuzzleSet = async (puzzle, metadata, pdfDoc) => {
   console.log(
@@ -424,6 +481,9 @@ fs.readFile(configFile, "utf8", async (err, data) => {
         );
       }
     }
+    // const pdfData = await fsPromises.readFile('../puzzles/Thermometers_15x15_Curved_puzzles_20231007.pdf');
+    // const pdfDoc = await PDFDocument.load(pdfData);    
+    // const finalPdfDoc = await makeTwoPagesPerSheet(pdfDoc, 2);
     let finalPdfDoc = pdfDoc;
 
     if (metadata.type == "normal") {
@@ -431,12 +491,13 @@ fs.readFile(configFile, "utf8", async (err, data) => {
       console.log("Shuffled pages.");
     }
 
-    // if (metadata.nup == 2) {
-    //   finalPdfDoc = await makeTwoPagesPerSheet(finalPdfDoc);
-    // }
+    if (metadata.nup == 2) {
+      finalPdfDoc = await makeTwoPagesPerSheet(finalPdfDoc, metadata.nup);
+    }
 
     // console.log(pages)
     const pdfBytes = await finalPdfDoc.save();
+    // await savePdf(pdfBytes, "test2persheet.pdf");
     await savePdf(pdfBytes, metadata.name);
   } catch (jsonError) {
     console.error(`Error parsing JSON: ${jsonError}`);
