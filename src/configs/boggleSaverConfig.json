@@ -1,0 +1,17 @@
+{
+    "metadata": {
+        "type": "normal",
+        "name": "Boggle"
+    },
+    "puzzles": [
+        {
+            "puzzleName": "Boggle, 4x4",
+            "url": "https://wordshake.com/boggle",
+            "numPuzzles": 4,
+            "aspectRatio": {
+                "height": 1,
+                "width": 0.8138528
+            }
+        }
+    ]
+}
